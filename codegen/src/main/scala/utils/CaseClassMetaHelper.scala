@@ -11,10 +11,10 @@ object CaseClassMetaHelper {
 
     source.transform {
       case c @ q"case class $tname (...$paramss)" if tname.value == modelName =>
-        println(s"- Updating CaseClass $modelName")
+        println(s"- Updating Case Class $modelName")
         caseClass
       case c @ q"case class $tname (...$paramss) { ..$body }" if tname.value == modelName =>
-        println(s"- Updating CaseClass $modelName (preserving body)")
+        println(s"- Updating Case Class $modelName (preserving body)")
         caseClass.transform {
           case q"case class $tname (...$paramss)" =>
             q"case class $tname (...$paramss) { ..$body }"

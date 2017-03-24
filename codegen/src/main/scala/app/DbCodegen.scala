@@ -53,26 +53,14 @@ object DbCodegen extends App {
       }
     }
 
-    println("- Creating Database if necessary")
-    val c         = DriverManager.getConnection(url.reverse.dropWhile(_ != '/').reverse, user, password)
-    val statement = c.createStatement()
-    try {
-      statement.executeUpdate(s"CREATE DATABASE ${url.reverse.takeWhile(_ != '/').reverse};")
-    } catch {
-      case scala.util.control.NonFatal(e) =>
-    } finally {
-      statement.close()
-      c.close()
-    }
-
-    println("- Migrating using flyway..")
+    println("- Migrating database using flyway..")
     val flyway = new Flyway
     flyway.setDataSource(url, user, password)
     flyway.setValidateOnMigrate(false) // Creates problems with windows machines
     flyway.setLocations(s"filesystem:server/conf/db/migration/$short")
     flyway.migrate()
 
-    println("- Starting codegeneration task..")
+    println("- Generating slick models..")
     def sourceGen =
       db.run(profile.createModel(Option(profile.defaultTables.map(ts => ts.filterNot(t => excluded contains t.name.name))))).map { model =>
         new CustomizedCodeGenerator(model)
