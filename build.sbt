@@ -35,9 +35,9 @@ lazy val web = (project in file("web"))
 lazy val dbdriver = (project in file("dbdriver"))
   .settings(
     libraryDependencies ++= Seq(
-      "com.github.tminglei" %% "slick-pg"            % slickPg,
-      "com.github.tminglei" %% "slick-pg_circe-json" % slickPg
-    )
+      "com.github.tminglei" %% "slick-pg",
+      "com.github.tminglei" %% "slick-pg_circe-json"
+    ).map(_ % slickPg)
   )
   .dependsOn(sharedJVM)
 
@@ -70,6 +70,7 @@ lazy val server = (project in file("server"))
       ws,
       "com.github.t3hnar"    %% "scala-bcrypt"    % bcrypt,
       "com.typesafe.slick"   %% "slick"           % slick,
+      "com.typesafe.slick"   %% "slick-hikaricp"  % slickHikaricp,
       "com.typesafe.play"    %% "play-slick"      % playSlick,
       "com.vmunier"          %% "scalajs-scripts" % playScalajs,
       "jp.t2v"               %% "play2-auth"      % playAuth,
@@ -102,16 +103,20 @@ lazy val server = (project in file("server"))
   .enablePlugins(PlayScala, SbtWeb, DockerPlugin, JavaServerAppPackaging)
 
 lazy val shared = (crossProject.crossType(CrossType.Pure) in file("shared"))
-  .settings(libraryDependencies ++= Seq(
-    "com.lihaoyi"   %%% "autowire"      % autowire,
-    "com.lihaoyi"   %%% "scalarx"       % scalarx,
-    "me.chrons"     %%% "diode-data"    % diode,
-    "org.typelevel" %%% "cats"          % cats,
-    "io.circe"      %%% "circe-core"    % circeVersion,
-    "io.circe"      %%% "circe-generic" % circeVersion,
-    "io.circe"      %%% "circe-parser"  % circeVersion,
-    "com.lihaoyi"   %%% "upickle"       % upickle
-  ))
+  .settings(
+      libraryDependencies ++= Seq(
+      "com.lihaoyi"   %%% "autowire"      % autowire,
+      "com.lihaoyi"   %%% "scalarx"       % scalarx,
+      "me.chrons"     %%% "diode-data"    % diode,
+      "org.typelevel" %%% "cats"          % cats,
+      "com.lihaoyi"   %%% "upickle"       % upickle
+    ) ++
+    Seq(
+      "io.circe" %%% "circe-core",
+      "io.circe" %%% "circe-generic",
+      "io.circe" %%% "circe-parser"
+    ).map(_ % circeVersion)
+  )
   .jsConfigure(_ enablePlugins ScalaJSPlugin)
   .jsSettings()
 
